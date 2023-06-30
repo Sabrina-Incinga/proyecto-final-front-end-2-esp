@@ -4,7 +4,7 @@ import { setupServer } from "msw/node";
 import {  render, screen, waitFor } from "../../test/test-utils";
 import { API_URL } from "../../app/constants";
 import { mockedQuotes } from "../../test/mockedQuotes";
-import { ESTADO_FETCH, MENSAJE_CARGANDO, NO_ENCONTRADO } from "./constants";
+import { ESTADO_FETCH, MENSAJE_CARGANDO, NOMBRE_INVALIDO, NO_ENCONTRADO } from "./constants";
 import  userEvent  from "@testing-library/user-event";
 import { ICita } from "./types";
 
@@ -112,6 +112,23 @@ describe("Componente Cita", () => {
             userEvent.click(button);
             const nameDisplay = await screen.findByText(query);
             expect(nameDisplay).toBeInTheDocument();    
+        });
+        it("Debería mostrar un mensaje de error al ingresar un número", async () => {
+            render(
+                <Cita/>,
+                {
+                    preloadedState: {cita: state}
+                }
+            );
+
+            const query = "56";
+            const input = screen.getByPlaceholderText("Ingresa el nombre del autor");
+            userEvent.clear(input);
+            userEvent.type(input, query);
+            const button = await screen.findByText("Obtener Cita");
+            userEvent.click(button);
+            const errorMessageDisplay = await screen.findByText(NOMBRE_INVALIDO);
+            expect(errorMessageDisplay).toBeInTheDocument();    
         });
     });
     describe("Cuando hay una cita desplegada y el usuario clickea en 'Borrar'", () => {
