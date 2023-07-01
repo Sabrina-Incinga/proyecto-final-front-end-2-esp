@@ -4,9 +4,8 @@ import { setupServer } from "msw/node";
 import {  render, screen, waitFor } from "../../test/test-utils";
 import { API_URL } from "../../app/constants";
 import { mockedQuotes } from "../../test/mockedQuotes";
-import { ESTADO_FETCH, MENSAJE_CARGANDO, NOMBRE_INVALIDO, NO_ENCONTRADO } from "./constants";
+import {  MENSAJE_CARGANDO, NOMBRE_INVALIDO, NO_ENCONTRADO } from "./constants";
 import  userEvent  from "@testing-library/user-event";
-import { ICita } from "./types";
 
 const randomQuote = mockedQuotes[1].data;
 const queries = mockedQuotes.map(m => m.query);
@@ -54,16 +53,6 @@ describe("Componente Cita", () => {
         });
     });
     describe("Cuando no se envían datos en el input", () => {
-        const quote:ICita = {
-            personaje: randomQuote.character,
-            cita: randomQuote.quote,
-            imagen: randomQuote.image,
-            direccionPersonaje: randomQuote.characterDirection
-          }
-        const state = {
-            data: quote,
-            estado: ESTADO_FETCH.INACTIVO
-        }
         it("Debería mostrar el mensaje 'Cargando' cuando la información está siendo solicitada", async () => {
             render(
                 <Cita/>
@@ -74,88 +63,56 @@ describe("Componente Cita", () => {
         });
         it("Debería mostrar una cita aleatoria cuando el usuario hace click en 'Obtener cita aleatoria'", async () => {
             render(
-                <Cita/>,
-                {
-                    preloadedState: {cita: state}
-                }
+                <Cita/>
             );
             const button = screen.getByText('Obtener cita aleatoria');
             userEvent.click(button);
-            const quoteDisplay = await screen.findByText(quote.cita);
+            const quoteDisplay = await screen.findByText(randomQuote.quote);
             expect(quoteDisplay).toBeInTheDocument();  
         });
     });
     describe("Cuando el usuario ingresa el nombre de un personaje en el input", () => {
-        const quote:ICita = {
-            personaje: randomQuote.character,
-            cita: randomQuote.quote,
-            imagen: randomQuote.image,
-            direccionPersonaje: randomQuote.characterDirection
-          }
-        const state = {
-            data: quote,
-            estado: ESTADO_FETCH.INACTIVO
-        }
         it("Debería mostrar una cita del personaje solicitado", async () => {
             render(
-                <Cita/>,
-                {
-                    preloadedState: {cita: state}
-                }
+                <Cita/>
             );
 
-            const query = "Bart Simpson";
+            const query = "Abe Simpson";
             const input = screen.getByPlaceholderText("Ingresa el nombre del autor");
-            userEvent.clear(input);
-            userEvent.type(input, query);
+            await userEvent.clear(input);
+            await userEvent.type(input, query);
             const button = await screen.findByText("Obtener Cita");
-            userEvent.click(button);
+            await userEvent.click(button);
             const nameDisplay = await screen.findByText(query);
             expect(nameDisplay).toBeInTheDocument();    
         });
         it("Debería mostrar un mensaje de error al ingresar un número", async () => {
             render(
-                <Cita/>,
-                {
-                    preloadedState: {cita: state}
-                }
+                <Cita/>
             );
 
             const query = "56";
             const input = screen.getByPlaceholderText("Ingresa el nombre del autor");
-            userEvent.clear(input);
-            userEvent.type(input, query);
+            await userEvent.clear(input);
+            await userEvent.type(input, query);
             const button = await screen.findByText("Obtener Cita");
-            userEvent.click(button);
+            await userEvent.click(button);
             const errorMessageDisplay = await screen.findByText(NOMBRE_INVALIDO);
             expect(errorMessageDisplay).toBeInTheDocument();    
         });
     });
     describe("Cuando hay una cita desplegada y el usuario clickea en 'Borrar'", () => {
-        const quote:ICita = {
-            personaje: randomQuote.character,
-            cita: randomQuote.quote,
-            imagen: randomQuote.image,
-            direccionPersonaje: randomQuote.characterDirection
-          }
-        const state = {
-            data: quote,
-            estado: ESTADO_FETCH.INACTIVO
-        }
         it("Debería borrar la cita desplegada", async () => {
             render(
-                <Cita/>,
-                {
-                    preloadedState: {cita: state}
-                }
+                <Cita/>
             );
             const button = screen.getByText('Obtener cita aleatoria');
-            userEvent.click(button);
-            const quoteDisplay = await screen.findByText(quote.cita);
+            await userEvent.click(button);
+            const quoteDisplay = await screen.findByText(randomQuote.quote);
             expect(quoteDisplay).toBeInTheDocument(); 
             const deleteButton = screen.getByText('Borrar');
-            userEvent.click(deleteButton);
-            await waitFor(() =>{ expect(screen.queryByText(quote.cita)).not.toBeInTheDocument()});                    
+            await userEvent.click(deleteButton);
+            await waitFor(() =>{ expect(screen.queryByText(randomQuote.quote)).not.toBeInTheDocument()});                    
         });
     });
   
